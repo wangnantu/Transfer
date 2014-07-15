@@ -8,7 +8,7 @@ package exceltransfer;
 
 /**
  *
- * @author wnt
+ * @author Administrator
  */
 public class ExcelTransfer {
 
