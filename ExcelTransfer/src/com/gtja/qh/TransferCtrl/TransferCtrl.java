@@ -8,7 +8,7 @@ package com.gtja.qh.TransferCtrl;
 
 /**
  *
- * @author 南图
+ * @author 王南图
  */
 public class TransferCtrl {
     

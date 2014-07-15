@@ -8,7 +8,7 @@ package com.gtja.qh;
 
 /**
  *
- * @author Administrator
+ * @author 王南图
  */
 public class Transfer {
 
