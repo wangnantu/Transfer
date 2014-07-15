@@ -5,7 +5,6 @@
  */
 
 package com.gtja.qh;
-
 /**
  *
  * @author Administrator
