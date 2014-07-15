@@ -10,7 +10,7 @@ package com.gtja.qh;
  *
  * @author Administrator
  */
-public class ExcelTransfer {
+public class Transfer {
 
     /**
      * @param args the command line arguments
