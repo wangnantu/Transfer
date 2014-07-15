@@ -1,0 +1,693 @@
+/**
+ * <p>Title: java访问DBF文件的接口</p>
+ * <p>Description: 这个类用于表示DBF文件中的写操作</p>
+ * <p>Copyright: Copyright (c) 2004</p>
+ * <p>Company: ict</p>
+ * @author : He Xiong
+ * @version 1.0
+ */
+
+package com.hexiong.jdbf;
+import java.io.*;
+import java.util.Calendar;
+// Referenced classes of package com.hexiong.jdbf:
+//            JDBFException, JDBField
+public class DBFWriter
+{
+    public DBFWriter(String s, JDBField ajdbfield[])
+        throws JDBFException
+    {
+        stream = null;
+        recCount = 0;
+        fields = null;
+        fileName = null;
+        dbfEncoding = null;
+        fileName = s;
+        try
+        {
+            init(new FileOutputStream(s), ajdbfield);
+        }
+        catch(FileNotFoundException filenotfoundexception)
+        {
+            throw new JDBFException(filenotfoundexception);
+        }
+    }
+    public DBFWriter(OutputStream outputstream, JDBField ajdbfield[])
+        throws JDBFException
+    {
+        stream = null;
+        recCount = 0;
+        fields = null;
+        fileName = null;
+        dbfEncoding = null;
+        init(outputstream, ajdbfield);
+    }
+    public DBFWriter(String s, JDBField ajdbfield[], String s1)
+        throws JDBFException
+    {
+        stream = null;
+        recCount = 0;
+        fields = null;
+        fileName = null;
+        dbfEncoding = null;
+        fileName = s;
+        try
+        {
+            dbfEncoding = s1;
+            init(new FileOutputStream(s), ajdbfield);
+        }
+        catch(FileNotFoundException filenotfoundexception)
+        {
+            throw new JDBFException(filenotfoundexception);
+        }
+    }
+    private void init(OutputStream outputstream, JDBField ajdbfield[])
+        throws JDBFException
+    {
+        fields = ajdbfield;
+        try
+        {
+            stream = new BufferedOutputStream(outputstream);
+            writeHeader();
+            for(int i = 0; i < ajdbfield.length; i++)
+                writeFieldHeader(ajdbfield[i]);
+            stream.write(13);
+            stream.flush();
+        }
+        catch(Exception exception)
+        {
+            throw new JDBFException(exception);
+        }
+    }
+    private void writeHeader()
+        throws IOException
+    {
+        byte abyte0[] = new byte[16];
+        abyte0[0] = 3;
+        Calendar calendar = Calendar.getInstance();
+        abyte0[1] = (byte)(calendar.get(1) - 1900);
+        abyte0[2] = (byte)calendar.get(2);
+        abyte0[3] = (byte)calendar.get(5);
+        abyte0[4] = 0;
+        abyte0[5] = 0;
+        abyte0[6] = 0;
+        abyte0[7] = 0;
+        int i = (fields.length + 1) * 32 + 1;
+        abyte0[8] = (byte)(i % 256);
+        abyte0[9] = (byte)(i / 256);
+        int j = 1;
+        for(int k = 0; k < fields.length; k++)
+            j += fields[k].getLength();
+        abyte0[10] = (byte)(j % 256);
+        abyte0[11] = (byte)(j / 256);
+        abyte0[12] = 0;
+        abyte0[13] = 0;
+        abyte0[14] = 0;
+        abyte0[15] = 0;
+        stream.write(abyte0, 0, abyte0.length);
+        for(int l = 0; l < 16; l++)
+            abyte0[l] = 0;
+        stream.write(abyte0, 0, abyte0.length);
+    }
+    private void writeFieldHeader(JDBField jdbfield)
+        throws IOException
+    {
+        byte abyte0[] = new byte[16];
+        String s = jdbfield.getName();
+        int i = s.length();
+        if(i > 10)
+            i = 10;
+        for(int j = 0; j < i; j++)
+            abyte0[j] = (byte)s.charAt(j);
+        for(int k = i; k <= 10; k++)
+            abyte0[k] = 0;
+        abyte0[11] = (byte)jdbfield.getType();
+        abyte0[12] = 0;
+        abyte0[13] = 0;
+        abyte0[14] = 0;
+        abyte0[15] = 0;
+        stream.write(abyte0, 0, abyte0.length);
+        for(int l = 0; l < 16; l++)
+            abyte0[l] = 0;
+        abyte0[0] = (byte)jdbfield.getLength();
+        abyte0[1] = (byte)jdbfield.getDecimalCount();
+        stream.write(abyte0, 0, abyte0.length);
+    }
+    public void addRecord(Object aobj[])
+        throws JDBFException
+    {
+        if(aobj.length != fields.length)
+            throw new JDBFException("Error adding record: Wrong number of values. Expected " + fields.length + ", got " + aobj.length + ".");
+        int i = 0;
+        for(int j = 0; j < fields.length; j++)
+            i += fields[j].getLength();
+        byte abyte0[] = new byte[i];
+        int k = 0;
+        for(int l = 0; l < fields.length; l++)
+        {
+            String s = fields[l].format(aobj[l]);
+            byte abyte1[];
+            try
+            {
+                if(dbfEncoding != null)
+                    abyte1 = s.getBytes(dbfEncoding);
+                else
+                    abyte1 = s.getBytes();
+            }
+            catch(UnsupportedEncodingException unsupportedencodingexception)
+            {
+                throw new JDBFException(unsupportedencodingexception);
+            }
+            for(int i1 = 0; i1 < fields[l].getLength(); i1++)
+                abyte0[k + i1] = abyte1[i1];
+            k += fields[l].getLength();
+        }
+        try
+        {
+            stream.write(32);
+            stream.write(abyte0, 0, abyte0.length);
+            stream.flush();
+        }
+        catch(IOException ioexception)
+        {
+            throw new JDBFException(ioexception);
+        }
+        recCount++;
+    }
+    public void close()
+        throws JDBFException
+    {
+        try
+        {
+            stream.write(26);
+            stream.close();
+            RandomAccessFile randomaccessfile = new RandomAccessFile(fileName, "rw");
+            randomaccessfile.seek(4L);
+            byte abyte0[] = new byte[4];
+            abyte0[0] = (byte)(recCount % 256);
+            abyte0[1] = (byte)((recCount / 256) % 256);
+            abyte0[2] = (byte)((recCount / 0x10000) % 256);
+            abyte0[3] = (byte)((recCount / 0x1000000) % 256);
+            randomaccessfile.write(abyte0, 0, abyte0.length);
+            randomaccessfile.close();
+        }
+        catch(IOException ioexception)
+        {
+            throw new JDBFException(ioexception);
+        }
+    }
+    private BufferedOutputStream stream;
+    private int recCount;
+    private JDBField fields[];
+    private String fileName;
+    private String dbfEncoding;
+}
+/**
+ * <p>Title: java访问DBF文件的接口</p>
+ * <p>Description: 这个类用于表示DBF文件中的字段</p>
+ * <p>Copyright: Copyright (c) 2004</p>
+ * <p>Company: ict</p>
+ * @author : He Xiong
+ * @version 1.0
+ */
+package com.hexiong.jdbf;
+import java.text.*;
+import java.util.Date;
+// Referenced classes of package com.hexiong.jdbf:
+//            JDBFException
+public class JDBField
+{
+    public JDBField(String s, char c, int i, int j)
+        throws JDBFException
+    {
+        if(s.length() > 10)
+            throw new JDBFException("The field name is more than 10 characters long: " + s);
+        if(c != 'C' && c != 'N' && c != 'L' && c != 'D' && c != 'F')
+            throw new JDBFException("The field type is not a valid. Got: " + c);
+        if(i < 1)
+            throw new JDBFException("The field length should be a positive integer. Got: " + i);
+        if(c == 'C' && i >= 254)
+            throw new JDBFException("The field length should be less than 254 characters for character fields. Got: " + i);
+        if(c == 'N' && i >= 21)
+            throw new JDBFException("The field length should be less than 21 digits for numeric fields. Got: " + i);
+        if(c == 'L' && i != 1)
+            throw new JDBFException("The field length should be 1 characater for logical fields. Got: " + i);
+        if(c == 'D' && i != 8)
+            throw new JDBFException("The field length should be 8 characaters for date fields. Got: " + i);
+        if(c == 'F' && i >= 21)
+            throw new JDBFException("The field length should be less than 21 digits for floating point fields. Got: " + i);
+        if(j < 0)
+            throw new JDBFException("The field decimal count should not be a negative integer. Got: " + j);
+        if((c == 'C' || c == 'L' || c == 'D') && j != 0)
+            throw new JDBFException("The field decimal count should be 0 for character, logical, and date fields. Got: " + j);
+        if(j > i - 1)
+        {
+            throw new JDBFException("The field decimal count should be less than the length - 1. Got: " + j);
+        } else
+        {
+            name = s;
+            type = c;
+            length = i;
+            decimalCount = j;
+            return;
+        }
+    }
+    public String getName()
+    {
+        return name;
+    }
+    public char getType()
+    {
+        return type;
+    }
+    public int getLength()
+    {
+        return length;
+    }
+    public int getDecimalCount()
+    {
+        return decimalCount;
+    }
+    public String format(Object obj)
+        throws JDBFException
+    {
+        if(type == 'N' || type == 'F')
+        {
+            if(obj == null)
+                obj = new Double(0.0D);
+            if(obj instanceof Number)
+            {
+                Number number = (Number)obj;
+                StringBuffer stringbuffer = new StringBuffer(getLength());
+                for(int i = 0; i < getLength(); i++)
+                    stringbuffer.append("#");
+                if(getDecimalCount() > 0)
+                    stringbuffer.setCharAt(getLength() - getDecimalCount() - 1, '.');
+                DecimalFormat decimalformat = new DecimalFormat(stringbuffer.toString());
+                String s1 = decimalformat.format(number);
+                int k = getLength() - s1.length();
+                if(k < 0)
+                    throw new JDBFException("Value " + number + " cannot fit in pattern: '" + stringbuffer + "'.");
+                StringBuffer stringbuffer2 = new StringBuffer(k);
+                for(int l = 0; l < k; l++)
+                    stringbuffer2.append(" ");
+                return stringbuffer2 + s1;
+            } else
+            {
+                throw new JDBFException("Expected a Number, got " + obj.getClass() + ".");
+            }
+        }
+        if(type == 'C')
+        {
+            if(obj == null)
+                obj = "";
+            if(obj instanceof String)
+            {
+                String s = (String)obj;
+                if(s.length() > getLength())
+                    throw new JDBFException("'" + obj + "' is longer than " + getLength() + " characters.");
+                StringBuffer stringbuffer1 = new StringBuffer(getLength() - s.length());
+                for(int j = 0; j < getLength() - s.length(); j++)
+                    stringbuffer1.append(' ');
+                return s + stringbuffer1;
+            } else
+            {
+                throw new JDBFException("Expected a String, got " + obj.getClass() + ".");
+            }
+        }
+        if(type == 'L')
+        {
+            if(obj == null)
+                obj = new Boolean(false);
+            if(obj instanceof Boolean)
+            {
+                Boolean boolean1 = (Boolean)obj;
+                return boolean1.booleanValue() ? "Y" : "N";
+            } else
+            {
+                throw new JDBFException("Expected a Boolean, got " + obj.getClass() + ".");
+            }
+        }
+        if(type == 'D')
+        {
+            if(obj == null)
+                obj = new Date();
+            if(obj instanceof Date)
+            {
+                Date date = (Date)obj;
+                SimpleDateFormat simpledateformat = new SimpleDateFormat("yyyyMMdd");
+                return simpledateformat.format(date);
+            } else
+            {
+                throw new JDBFException("Expected a Date, got " + obj.getClass() + ".");
+            }
+        } else
+        {
+            throw new JDBFException("Unrecognized JDBFField type: " + type);
+        }
+    }
+    public Object parse(String s)
+        throws JDBFException
+    {
+        s = s.trim();
+        if(type == 'N' || type == 'F')
+        {
+            if(s.equals(""))
+                s = "0";
+            try
+            {
+                if(getDecimalCount() == 0)
+                    return new Long(s);
+                else
+                    return new Double(s);
+            }
+            catch(NumberFormatException numberformatexception)
+            {
+                throw new JDBFException(numberformatexception);
+            }
+        }
+        if(type == 'C')
+            return s;
+        if(type == 'L')
+        {
+            if(s.equals("Y") || s.equals("y") || s.equals("T") || s.equals("t"))
+                return new Boolean(true);
+            if(s.equals("N") || s.equals("n") || s.equals("F") || s.equals("f"))
+                return new Boolean(false);
+            else
+                throw new JDBFException("Unrecognized value for logical field: " + s);
+        }
+        if(type == 'D')
+        {
+            SimpleDateFormat simpledateformat = new SimpleDateFormat("yyyyMMdd");
+            try
+            {
+                if("".equals(s))
+                    return null;
+                else
+                    return simpledateformat.parse(s);
+            }
+            catch(ParseException parseexception)
+            {
+                throw new JDBFException(parseexception);
+            }
+        } else
+        {
+            throw new JDBFException("Unrecognized JDBFField type: " + type);
+        }
+    }
+    public String toString()
+    {
+        return name;
+    }
+    private String name;
+    private char type;
+    private int length;
+    private int decimalCount;
+}
+/**
+ * <p>Title: java访问DBF文件的接口</p>
+ * <p>Description: 这个类用于表示DBF文件中的读写异常</p>
+ * <p>Copyright: Copyright (c) 2004</p>
+ * <p>Company: ict</p>
+ * @author : He Xiong
+ * @version 1.0
+ */
+package com.hexiong.jdbf;
+import java.io.PrintStream;
+import java.io.PrintWriter;
+public class JDBFException extends Exception
+{
+    public JDBFException(String s)
+    {
+        this(s, null);
+    }
+    public JDBFException(Throwable throwable)
+    {
+        this(throwable.getMessage(), throwable);
+    }
+    public JDBFException(String s, Throwable throwable)
+    {
+        super(s);
+        detail = throwable;
+    }
+    public String getMessage()
+    {
+        if(detail == null)
+            return super.getMessage();
+        else
+            return super.getMessage();
+    }
+    public void printStackTrace(PrintStream printstream)
+    {
+        if(detail == null)
+        {
+            super.printStackTrace(printstream);
+            return;
+        }
+        PrintStream printstream1 = printstream;
+        printstream1.println(this);
+        detail.printStackTrace(printstream);
+        return;
+    }
+    public void printStackTrace()
+    {
+        printStackTrace(System.err);
+    }
+    public void printStackTrace(PrintWriter printwriter)
+    {
+        if(detail == null)
+        {
+            super.printStackTrace(printwriter);
+            return;
+        }
+        PrintWriter printwriter1 = printwriter;
+        printwriter1.println(this);
+        detail.printStackTrace(printwriter);
+        return;
+    }
+    private Throwable detail;
+}
+/**
+ * <p>Title: java访问DBF文件的接口</p>
+ * <p>Description: 这个类用于表示DBF文件中的读操作</p>
+ * <p>Copyright: Copyright (c) 2004</p>
+ * <p>Company: ict</p>
+ * @author : He Xiong
+ * @version 1.0
+ */
+package com.hexiong.jdbf;
+import java.io.*;
+// Referenced classes of package com.hexiong.jdbf:
+//            JDBFException, JDBField
+public class DBFReader
+{
+    public DBFReader(String s)
+        throws JDBFException
+    {
+        stream = null;
+        fields = null;
+        nextRecord = null;
+        try
+        {
+            init(new FileInputStream(s));
+        }
+        catch(FileNotFoundException filenotfoundexception)
+        {
+            throw new JDBFException(filenotfoundexception);
+        }
+    }
+    public DBFReader(InputStream inputstream)
+        throws JDBFException
+    {
+        stream = null;
+        fields = null;
+        nextRecord = null;
+        init(inputstream);
+    }
+    private void init(InputStream inputstream)
+        throws JDBFException
+    {
+        try
+        {
+            stream = new DataInputStream(inputstream);
+            int i = readHeader();
+            fields = new JDBField[i];
+            int j = 1;
+            for(int k = 0; k < i; k++)
+            {
+                fields[k] = readFieldHeader();
+                j += fields[k].getLength();
+            }
+            if(stream.read() < 1)
+                throw new JDBFException("Unexpected end of file reached.");
+            nextRecord = new byte[j];
+            try
+            {
+                stream.readFully(nextRecord);
+            }
+            catch(EOFException eofexception)
+            {
+                nextRecord = null;
+                stream.close();
+            }
+        }
+        catch(IOException ioexception)
+        {
+            throw new JDBFException(ioexception);
+        }
+    }
+    private int readHeader()
+        throws IOException, JDBFException
+    {
+        byte abyte0[] = new byte[16];
+        try
+        {
+            stream.readFully(abyte0);
+        }
+        catch(EOFException eofexception)
+        {
+            throw new JDBFException("Unexpected end of file reached.");
+        }
+        int i = abyte0[8];
+        if(i < 0)
+            i += 256;
+        i += 256 * abyte0[9];
+        i = --i / 32;
+        i--;
+        try
+        {
+            stream.readFully(abyte0);
+        }
+        catch(EOFException eofexception1)
+        {
+            throw new JDBFException("Unexpected end of file reached.");
+        }
+        return i;
+    }
+    private JDBField readFieldHeader()
+        throws IOException, JDBFException
+    {
+        byte abyte0[] = new byte[16];
+        try
+        {
+            stream.readFully(abyte0);
+        }
+        catch(EOFException eofexception)
+        {
+            throw new JDBFException("Unexpected end of file reached.");
+        }
+        StringBuffer stringbuffer = new StringBuffer(10);
+        for(int i = 0; i < 10; i++)
+        {
+            if(abyte0[i] == 0)
+                break;
+            stringbuffer.append((char)abyte0[i]);
+        }
+        char c = (char)abyte0[11];
+        try
+        {
+            stream.readFully(abyte0);
+        }
+        catch(EOFException eofexception1)
+        {
+            throw new JDBFException("Unexpected end of file reached.");
+        }
+        int j = abyte0[0];
+        int k = abyte0[1];
+        if(j < 0)
+            j += 256;
+        if(k < 0)
+            k += 256;
+        return new JDBField(stringbuffer.toString(), c, j, k);
+    }
+    public int getFieldCount()
+    {
+        return fields.length;
+    }
+    public JDBField getField(int i)
+    {
+        return fields[i];
+    }
+    public boolean hasNextRecord()
+    {
+        return nextRecord != null;
+    }
+    public Object[] nextRecord()
+        throws JDBFException
+    {
+        if(!hasNextRecord())
+            throw new JDBFException("No more records available.");
+        Object aobj[] = new Object[fields.length];
+        int i = 1;
+        for(int j = 0; j < aobj.length; j++)
+        {
+            int k = fields[j].getLength();
+            StringBuffer stringbuffer = new StringBuffer(k);
+            stringbuffer.append(new String(nextRecord, i, k));
+            aobj[j] = fields[j].parse(stringbuffer.toString());
+            i += fields[j].getLength();
+        }
+        try
+        {
+            stream.readFully(nextRecord);
+        }
+        catch(EOFException eofexception)
+        {
+            nextRecord = null;
+        }
+        catch(IOException ioexception)
+        {
+            throw new JDBFException(ioexception);
+        }
+        return aobj;
+    }
+    public void close()
+        throws JDBFException
+    {
+        nextRecord = null;
+        try
+        {
+            stream.close();
+        }
+        catch(IOException ioexception)
+        {
+            throw new JDBFException(ioexception);
+        }
+    }
+    private DataInputStream stream;
+    private JDBField fields[];
+    private byte nextRecord[];
+}
+最后，给出一个简单的测试样例程序
+/**
+ * <p>Title: java访问DBF文件的接口</p>
+ * <p>Description: 测试DBF文件的读写</p>
+ * <p>Copyright: Copyright (c) 2004</p>
+ * <p>Company: ict</p>
+ * @author : He Xiong
+ * @version 1.0
+ */
+import com.hexiong.jdbf.DBFReader;
+import java.io.PrintStream;
+import java.net.URL;
+public class Test
+{
+    public Test()
+    {
+    }
+    public static void main(String args[])
+        throws Exception
+    {
+        DBFReader dbfreader = new DBFReader("E://lakes.dbf");
+        int i;
+        for(i = 0; dbfreader.hasNextRecord(); i++)
+        {
+            Object aobj[] = dbfreader.nextRecord();
+            for (int j=0; j<aobj.length; j++)
+              System.out.print(aobj[j]+"  |  ");
+            System.out.print("/n");
+        }
+        System.out.println("Total Count: " + i);
+    }
+}
