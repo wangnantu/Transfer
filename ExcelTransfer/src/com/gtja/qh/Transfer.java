@@ -6,17 +6,15 @@
 
 package com.gtja.qh;
 
+import com.gtja.qh.TransferCtrl.TransferCtrl;
+
 /**
  *
  * @author 王南图
  */
 public class Transfer {
-
-    /**
-     * @param args the command line arguments
-     */
     public static void main(String[] args) {
-        // TODO code application logic here
+        new TransferCtrl();
     }
     
 }
