@@ -15,8 +15,8 @@ public class Frame extends javax.swing.JFrame {
 
     private javax.swing.JButton selectFileButton;
     private javax.swing.JButton generateButton;
-    private javax.swing.JCheckBox jCheckBox1;
-    private javax.swing.JCheckBox jCheckBox2;
+    private javax.swing.JCheckBox TxtCB;
+    private javax.swing.JCheckBox DbfCB;
     private javax.swing.JLabel jLabel1;
     private javax.swing.JLabel jLabel2;
     private javax.swing.JTextField filePath;
@@ -35,8 +35,8 @@ public class Frame extends javax.swing.JFrame {
 
         filePath = new javax.swing.JTextField();
         selectFileButton= new javax.swing.JButton();
-        jCheckBox1 = new javax.swing.JCheckBox();
-        jCheckBox2 = new javax.swing.JCheckBox();
+        TxtCB = new javax.swing.JCheckBox();
+        DbfCB = new javax.swing.JCheckBox();
         jLabel1 = new javax.swing.JLabel();
         jLabel2 = new javax.swing.JLabel();
         date = new javax.swing.JTextField();
@@ -53,12 +53,14 @@ public class Frame extends javax.swing.JFrame {
 //            }
 //        });
 
-        jCheckBox1.setText("TXT");
+        TxtCB.setText("TXT");
+        TxtCB.setSelected(true);
 
-        jCheckBox2.setText("DBF");
-//        jCheckBox2.addActionListener(new java.awt.event.ActionListener() {
+        DbfCB.setText("DBF");
+        DbfCB.setSelected(true);
+//        DbfCB.addActionListener(new java.awt.event.ActionListener() {
 //            public void actionPerformed(java.awt.event.ActionEvent evt) {
-//                jCheckBox2ActionPerformed(evt);
+//                DbfCBActionPerformed(evt);
 //            }
 //        });
 
@@ -80,9 +82,9 @@ public class Frame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel1)
                         .addPreferredGap(javax.swing.LayoutStyle.ComponentPlacement.RELATED, javax.swing.GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE)
-                        .addComponent(jCheckBox1)
+                        .addComponent(TxtCB)
                         .addGap(45, 45, 45)
-                        .addComponent(jCheckBox2))
+                        .addComponent(DbfCB))
                     .addComponent(filePath, javax.swing.GroupLayout.PREFERRED_SIZE, 242, javax.swing.GroupLayout.PREFERRED_SIZE)
                     .addGroup(layout.createSequentialGroup()
                         .addComponent(jLabel2)
@@ -105,8 +107,8 @@ public class Frame extends javax.swing.JFrame {
                     .addGroup(layout.createSequentialGroup()
                         .addGap(34, 34, 34)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
-                            .addComponent(jCheckBox1)
-                            .addComponent(jCheckBox2)
+                            .addComponent(TxtCB)
+                            .addComponent(DbfCB)
                             .addComponent(jLabel1))
                         .addGap(31, 31, 31)
                         .addGroup(layout.createParallelGroup(javax.swing.GroupLayout.Alignment.BASELINE)
@@ -125,7 +127,7 @@ public class Frame extends javax.swing.JFrame {
 //        // TODO add your handling code here:
 //    }                                        
 //
-//    private void jCheckBox2ActionPerformed(java.awt.event.ActionEvent evt) {                                           
+//    private void DbfCBActionPerformed(java.awt.event.ActionEvent evt) {                                           
 //        // TODO add your handling code here:
 //    }                                          
 
@@ -137,12 +139,12 @@ public class Frame extends javax.swing.JFrame {
         return generateButton;
     }
 
-    public JCheckBox getjCheckBox1() {
-        return jCheckBox1;
+    public JCheckBox getTxtCB() {
+        return TxtCB;
     }
 
-    public JCheckBox getjCheckBox2() {
-        return jCheckBox2;
+    public JCheckBox getDbfCB() {
+        return DbfCB;
     }
 
     public JTextField getFilePath() {
