@@ -288,22 +288,23 @@ public class TransferCtrl {
              jxl.Workbook rwb = jxl.Workbook.getWorkbook(is);
              jxl.Sheet rs = rwb.getSheet(0);
              int rsRows= rs.getRows();
-             Object[] rowData = new Object[6];
-             rowData[0] = "000101";
-             rowData[1] = "0001";
-             rowData[4] = "A999";
              for( int i=1; i < rsRows; i++){
-                 rowData[2] = rs.getCell(4, i).getContents();
-                 rowData[3] = rs.getCell(6, i).getContents();
+                 Object[] rowData = new Object[6];
+                 rowData[0] = "000101";
+                 rowData[1] = "0001";
+                 rowData[4] = "A999";
+                 String tradeCode = rs.getCell(4, i).getContents();
                  double amount = 0;
-                 if(rs.getCell(7, i).getType() == CellType.NUMBER){
-                     NumberCell numberCell = (NumberCell)rs.getCell(7, i); 
+                 if(rs.getCell(6, i).getType() == CellType.NUMBER){
+                     NumberCell numberCell = (NumberCell)rs.getCell(6, i); 
                      amount =numberCell.getValue();
                  }else{
-                     //amount = Convert.ToDecimal(rs.getCell(7,i).getContents());
+                     amount =new DecimalFormat("0.00").parse(rs.getCell(7,i).getContents()).doubleValue();    //将String转换为Double 
                  }
-                 rowData[5] = amount;
-                // new DecimalFormat().parse(rs.getCell(7,i).getContents()).doubleValue();       //将String转换为Double
+                 String typeMemo = rs.getCell(7, i).getContents();
+                 rowData[2] = tradeCode;
+                 rowData[3] = amount;
+                 rowData[5] = typeMemo;
                  writer.addRecord(rowData); 
              }
           }catch (Exception e) {
@@ -319,11 +320,11 @@ public class TransferCtrl {
                 //wb = new XSSFWorkbook(inputFilePath);
                 XSSFSheet sheet = wb.getSheetAt(0);
                 int rows = sheet.getPhysicalNumberOfRows();
-                Object[] rowData = new Object[6];
-                rowData[0] = "000101";
-                rowData[1] = "0001";
-                rowData[4] = "A999";
                 for(int i = 1;i<rows;i++){
+                    Object[] rowData = new Object[6];
+                    rowData[0] = "000101";
+                    rowData[1] = "0001";
+                    rowData[4] = "A999";
                     Row row = sheet.getRow(i);
                     if(row == null){
                         continue;
