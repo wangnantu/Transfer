@@ -17,8 +17,6 @@ import java.io.InputStream;
 import java.io.OutputStream;
 import java.text.DecimalFormat;
 import java.text.SimpleDateFormat;
-import java.util.logging.Level;
-import java.util.logging.Logger;
 import javax.swing.JFileChooser;
 import javax.swing.JOptionPane;
 import javax.swing.filechooser.FileNameExtensionFilter;
@@ -87,9 +85,10 @@ public class TransferCtrl {
           });
     }
     
-     private void generateButtonActionPerformed(java.awt.event.ActionEvent evt) throws DBFException {                                         
-        String date = frame.getDate().getText();
+     private void generateButtonActionPerformed(java.awt.event.ActionEvent evt) throws DBFException { 
         String inputFilePath = frame.getFilePath().getText();
+      if(inputFilePath.length() != 0 ){ 
+        String date = frame.getDate().getText();
         String fileName;
         if(!(frame.getTxtCB().isSelected()||frame.getDbfCB().isSelected())){
              JOptionPane.showMessageDialog(null, "请至少选择一种文件类型", "注意", JOptionPane.ERROR_MESSAGE);
@@ -137,11 +136,15 @@ public class TransferCtrl {
                                 JOptionPane.showMessageDialog(null, "Dbf文件已生成", "注意", JOptionPane.PLAIN_MESSAGE);
                             }
                     }
-            }else{
-           JOptionPane.showMessageDialog(null, "请输入有效日期", "注意", JOptionPane.ERROR_MESSAGE);
             }   
+        }else{
+           JOptionPane.showMessageDialog(null, "请输入有效日期", "注意", JOptionPane.ERROR_MESSAGE);
+            }
+     
         }
-     }
+       }else{
+          JOptionPane.showMessageDialog(null, "请选择文件", "注意", JOptionPane.ERROR_MESSAGE);
+      }
     }
      
      private boolean isValidDate(String s){
@@ -183,7 +186,6 @@ public class TransferCtrl {
             InputStream fs = new FileInputStream(inputFilePath);
             XSSFWorkbook wb;
              wb = new XSSFWorkbook(fs);
-             //wb = new XSSFWorkbook(inputFilePath);
              XSSFSheet sheet = wb.getSheetAt(0);
              int rows = sheet.getPhysicalNumberOfRows();
              input = new StringBuffer();
@@ -198,12 +200,18 @@ public class TransferCtrl {
                  }
                  if(row.getCell(6) == null){
                      row.createCell(6);
-                     row.getCell(6).setCellValue("");
+                     row.getCell(6).setCellType(CELL_TYPE_NUMERIC);
+                     row.getCell(6).setCellValue(0);
                  }
-                 row.getCell(4).setCellType(CELL_TYPE_STRING );
-                 row.getCell(6).setCellType(CELL_TYPE_STRING );
-                 String tradeCode = row.getCell(4).getStringCellValue();;
-                 String amount = row.getCell(6).getStringCellValue();
+//                 row.getCell(4).setCellType(CELL_TYPE_STRING );
+//                 row.getCell(6).setCellType(CELL_TYPE_STRING );
+                 String tradeCode = row.getCell(4).getStringCellValue();
+                 double amount;
+                 if(row.getCell(6).getCellType() == CELL_TYPE_NUMERIC){
+                     amount = row.getCell(6).getNumericCellValue();
+                 }else{
+                     amount =new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();    //将String转换为Double 
+                 }
                  String line = "A999@" + tradeCode + "@" + amount + "\r\n";
                  input.append(line);
              }
@@ -294,12 +302,17 @@ public class TransferCtrl {
                  rowData[1] = "0001";
                  rowData[4] = "A999";
                  String tradeCode = rs.getCell(4, i).getContents();
-                 double amount = 0;
+                 double amount;
                  if(rs.getCell(6, i).getType() == CellType.NUMBER){
                      NumberCell numberCell = (NumberCell)rs.getCell(6, i); 
                      amount =numberCell.getValue();
                  }else{
-                     amount =new DecimalFormat("0.00").parse(rs.getCell(7,i).getContents()).doubleValue();    //将String转换为Double 
+                     if(rs.getCell(6,i).getContents().length() == 0){
+                         amount = 0;
+                     }else{
+                         amount =new DecimalFormat("0.00").parse(rs.getCell(6,i).getContents()).doubleValue();    //将String转换为Double 
+                     }
+                    
                  }
                  String typeMemo = rs.getCell(7, i).getContents();
                  rowData[2] = tradeCode;
@@ -335,17 +348,24 @@ public class TransferCtrl {
                     }
                     if(row.getCell(6) == null){
                         row.createCell(6);
-                        row.getCell(6).setCellValue("");
+                        row.getCell(6).setCellType(CELL_TYPE_NUMERIC);
+                        row.getCell(6).setCellValue(0);
                     }
                     if(row.getCell(7) == null){
                         row.createCell(7);
                         row.getCell(7).setCellValue("");
                     }
-                    row.getCell(4).setCellType(CELL_TYPE_STRING );
-                    row.getCell(6).setCellType(CELL_TYPE_NUMERIC );
-                    row.getCell(7).setCellType(CELL_TYPE_STRING);
-                    String tradeCode = row.getCell(4).getStringCellValue();;
-                    Double amount = row.getCell(6).getNumericCellValue();
+//                    row.getCell(4).setCellType(CELL_TYPE_STRING );
+//                    row.getCell(6).setCellType(CELL_TYPE_NUMERIC );
+//                    row.getCell(7).setCellType(CELL_TYPE_STRING);
+                    String tradeCode = row.getCell(4).getStringCellValue();
+                    Double amount = null;
+                    if(row.getCell(6).getCellType() == CELL_TYPE_NUMERIC){
+                         amount = row.getCell(6).getNumericCellValue();
+                    }else{
+                        row.getCell(6).setCellType(CELL_TYPE_STRING);
+                        amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();
+                    }
                     String typeMemo = row.getCell(7).getStringCellValue();
                     rowData[2] = tradeCode;
                     rowData[3] = amount;
@@ -369,6 +389,7 @@ public class TransferCtrl {
 
              //写入数据 
             writer.write(os); 
+            os.close();
             return true;
         }catch(Exception e){
             e.printStackTrace();

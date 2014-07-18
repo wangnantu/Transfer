@@ -25,6 +25,7 @@ public class Frame extends javax.swing.JFrame {
     public Frame() {
         initComponents();
         this.setSizeAndCentralizeMe(450, 300);
+        this.setTitle("Excel文件转换工具(结息专用）");
         this.setVisible(true);
     }
 
