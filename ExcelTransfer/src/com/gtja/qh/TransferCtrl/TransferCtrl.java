@@ -200,17 +200,19 @@ public class TransferCtrl {
                  }
                  if(row.getCell(6) == null){
                      row.createCell(6);
-                     row.getCell(6).setCellType(CELL_TYPE_NUMERIC);
-                     row.getCell(6).setCellValue(0);
+                     row.getCell(6).setCellValue("");
                  }
-//                 row.getCell(4).setCellType(CELL_TYPE_STRING );
-//                 row.getCell(6).setCellType(CELL_TYPE_STRING );
+
                  String tradeCode = row.getCell(4).getStringCellValue();
-                 double amount;
+                 Double amount = null;
                  if(row.getCell(6).getCellType() == CELL_TYPE_NUMERIC){
                      amount = row.getCell(6).getNumericCellValue();
                  }else{
-                     amount =new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();    //将String转换为Double 
+                     if(row.getCell(6).getStringCellValue().length() == 0){
+                         amount = null;
+                     }else{
+                     amount =new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();  //将String转换为Double 
+                     }
                  }
                  String line = "A999@" + tradeCode + "@" + amount + "\r\n";
                  input.append(line);
@@ -302,13 +304,13 @@ public class TransferCtrl {
                  rowData[1] = "0001";
                  rowData[4] = "A999";
                  String tradeCode = rs.getCell(4, i).getContents();
-                 double amount;
+                 Double amount = null;
                  if(rs.getCell(6, i).getType() == CellType.NUMBER){
                      NumberCell numberCell = (NumberCell)rs.getCell(6, i); 
                      amount =numberCell.getValue();
                  }else{
                      if(rs.getCell(6,i).getContents().length() == 0){
-                         amount = 0;
+                         amount = null;
                      }else{
                          amount =new DecimalFormat("0.00").parse(rs.getCell(6,i).getContents()).doubleValue();    //将String转换为Double 
                      }
@@ -348,8 +350,7 @@ public class TransferCtrl {
                     }
                     if(row.getCell(6) == null){
                         row.createCell(6);
-                        row.getCell(6).setCellType(CELL_TYPE_NUMERIC);
-                        row.getCell(6).setCellValue(0);
+                        row.getCell(6).setCellValue("");
                     }
                     if(row.getCell(7) == null){
                         row.createCell(7);
@@ -364,7 +365,11 @@ public class TransferCtrl {
                          amount = row.getCell(6).getNumericCellValue();
                     }else{
                         row.getCell(6).setCellType(CELL_TYPE_STRING);
+                        if(row.getCell(6).getStringCellValue().length() == 0){
+                            amount = null;
+                        }else{
                         amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();
+                        }
                     }
                     String typeMemo = row.getCell(7).getStringCellValue();
                     rowData[2] = tradeCode;
