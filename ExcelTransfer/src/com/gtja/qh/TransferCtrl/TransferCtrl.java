@@ -214,7 +214,12 @@ public class TransferCtrl {
                      amount =new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();  //将String转换为Double 
                      }
                  }
-                 String line = "A999@" + tradeCode + "@" + amount + "\r\n";
+                 String line;
+                 if(amount == null){
+                     line = "A999@" + tradeCode + "@" + "\r\n";
+                 }else{
+                     line = "A999@" + tradeCode + "@" + amount + "\r\n";
+                 }
                  input.append(line);
              }
          }catch (Exception e) {
