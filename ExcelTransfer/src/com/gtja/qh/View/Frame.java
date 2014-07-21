@@ -8,6 +8,7 @@ import javax.swing.JButton;
 import javax.swing.JCheckBox;
 import javax.swing.JFrame;
 import javax.swing.JTextField;
+import javax.swing.UIManager;
 
 /**
  *
@@ -37,7 +38,12 @@ public class Frame extends JFrame {
     @SuppressWarnings("unchecked")
     // <editor-fold defaultstate="collapsed" desc="Generated Code">                          
     private void initComponents() {
-        
+         String windows="com.sun.java.swing.plaf.windows.WindowsLookAndFeel";
+        try {
+            UIManager.setLookAndFeel(windows);
+        } catch (Exception e) {
+            e.printStackTrace();
+        } 
         filePath = new javax.swing.JTextField();
         selectFileButton= new javax.swing.JButton();
         TxtCB = new javax.swing.JCheckBox();
@@ -59,10 +65,10 @@ public class Frame extends JFrame {
 //            }
 //        });
 
-        TxtCB.setText("TXT(上期）");
+        TxtCB.setText("TXT(上期所）");
         TxtCB.setSelected(true);
 
-        DbfCB.setText("DBF（中金）");
+        DbfCB.setText("DBF（中金所）");
         DbfCB.setSelected(true);
 //        DbfCB.addActionListener(new java.awt.event.ActionListener() {
 //            public void actionPerformed(java.awt.event.ActionEvent evt) {
@@ -132,8 +138,7 @@ public class Frame extends JFrame {
         );
 
         pack();
-    }// </editor-fold>                        
-
+    }
 //    private void selectFileButtonActionPerformed(java.awt.event.ActionEvent evt) {                                         
 //        // TODO add your handling code here:
 //    }                                        

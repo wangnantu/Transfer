@@ -251,6 +251,7 @@ public class TransferCtrl {
             
         } catch (Exception e) {
            e.printStackTrace(); 
+           JOptionPane.showMessageDialog(null, "文件无法写入，可能另一个程序正在使用此文件", "注意", JOptionPane.ERROR_MESSAGE);
            return false;
         }
          
@@ -412,13 +413,12 @@ public class TransferCtrl {
                 file.createNewFile();
             }
              OutputStream os = new FileOutputStream(file);
-
-             //写入数据 
-            writer.write(os); 
+            writer.write(os);    //写入数据 
             os.close();
             return true;
         }catch(Exception e){
             e.printStackTrace();
+            JOptionPane.showMessageDialog(null, "文件无法写入，可能另一个程序正在使用此文件", "注意", JOptionPane.ERROR_MESSAGE);
             return false;
         }     
      }
