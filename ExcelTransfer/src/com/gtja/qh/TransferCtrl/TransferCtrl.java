@@ -265,23 +265,22 @@ public class TransferCtrl {
         fields[0] = new DBFField();
         fields[0].setName("ACCOUNTID");
         fields[0].setDataType(DBFField.FIELD_TYPE_C);
-        fields[0].setFieldLength(6);
+        fields[0].setFieldLength(12);
         
         fields[1] = new DBFField();
         fields[1].setName("PARTID");
         fields[1].setDataType(DBFField.FIELD_TYPE_C);
-        fields[1].setFieldLength(4);
+        fields[1].setFieldLength(12);
              
         fields[2] = new DBFField();
         fields[2].setName("CLIENTID");
         fields[2].setDataType(DBFField.FIELD_TYPE_C);
-        fields[2].setFieldLength(8);
+        fields[2].setFieldLength(12);
              
         fields[3] = new DBFField();
         fields[3].setName("AMOUNT");
-        fields[3].setDataType(DBFField.FIELD_TYPE_N);
-        fields[3].setFieldLength(23);                         
-        fields[3].setDecimalCount(2);
+        fields[3].setDataType(DBFField.FIELD_TYPE_C);
+        fields[3].setFieldLength(20);    
              
         fields[4] = new DBFField();
         fields[4].setName("MONEYTYPE");
@@ -291,7 +290,7 @@ public class TransferCtrl {
         fields[5] = new DBFField();
         fields[5].setName("TYPEMEMO");
         fields[5].setDataType(DBFField.FIELD_TYPE_C);
-        fields[5].setFieldLength(40);
+        fields[5].setFieldLength(30);
         DBFWriter writer = new DBFWriter();
         try{
          writer.setFields(fields);
@@ -319,20 +318,24 @@ public class TransferCtrl {
                  rowData[4] = "A999";
                  String tradeCode = rs.getCell(4, i).getContents();
                  Double amount = null;
+                 String amt = null;
                  if(rs.getCell(6, i).getType() == CellType.NUMBER){
                      NumberCell numberCell = (NumberCell)rs.getCell(6, i); 
                      amount =numberCell.getValue();
+                     amt = new DecimalFormat("0.00").format(amount);
                  }else{
                      if(rs.getCell(6,i).getContents().length() == 0){
                          amount = null;
+                         amt = "";
                      }else{
                          amount =new DecimalFormat("0.00").parse(rs.getCell(6,i).getContents()).doubleValue();    //将String转换为Double 
+                         amt = amount.toString();
                      }
                     
                  }
                  String typeMemo = rs.getCell(7, i).getContents();
                  rowData[2] = tradeCode;
-                 rowData[3] = amount;
+                 rowData[3] = amt;
                  rowData[5] = typeMemo;
                  writer.addRecord(rowData); 
                  }else{
@@ -378,19 +381,23 @@ public class TransferCtrl {
                     }
                     String tradeCode = row.getCell(4).getStringCellValue();
                     Double amount = null;
+                    String amt = null;
                     if(row.getCell(6).getCellType() == CELL_TYPE_NUMERIC){
                          amount = row.getCell(6).getNumericCellValue();
+                         amt = new DecimalFormat("0.00").format(amount);
                     }else{
                         row.getCell(6).setCellType(CELL_TYPE_STRING);
                         if(row.getCell(6).getStringCellValue().length() == 0){
                             amount = null;
+                            amt = "";
                         }else{
                         amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();
+                        amt = amount.toString();
                         }
                     }
                     String typeMemo = row.getCell(7).getStringCellValue();
                     rowData[2] = tradeCode;
-                    rowData[3] = amount;
+                    rowData[3] = amt;
                     rowData[5] = typeMemo;
                     writer.addRecord(rowData);
                   }else{
