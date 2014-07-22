@@ -237,7 +237,7 @@ public class TransferCtrl {
          try {
             //创建输出文件
             String fileName = "0004_00000001_" + frame.getDate().getText()+"_DailyFundChg";
-            String outFile = outFileDir + "\\" + fileName + ".txt";
+            String outFile = outFileDir + "\\" + fileName + ".TXT";
             File file = new File(outFile);
             if (!file.exists()) {
                 file.createNewFile();
