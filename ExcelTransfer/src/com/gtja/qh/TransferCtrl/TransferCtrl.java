@@ -414,7 +414,7 @@ public class TransferCtrl {
         try{        
               //创建输出文件
             String fileName = "0001_SG01_" + frame.getDate().getText() + "_1_ClientCapitalDetail";
-            String outFile = outFileDir + "\\" + fileName + ".dbf";
+            String outFile = outFileDir + "\\" + fileName + ".DBF";
             File file = new File(outFile);
             if (!file.exists()) {
                 file.createNewFile();
