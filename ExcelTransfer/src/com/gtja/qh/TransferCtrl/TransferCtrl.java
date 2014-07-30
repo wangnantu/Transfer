@@ -218,8 +218,8 @@ public class TransferCtrl {
                          amount = null;
                          amt = "";
                      }else{
-                     amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();  //将String转换为Double
-                     amt = amount.toString();
+                     //amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();  //将String转换为Double
+                     amt = row.getCell(6).getStringCellValue();//amount.toString();
                      }
                  }   
                  String  line = "A999@" + tradeCode + "@" + amt + "\r\n";     
@@ -328,8 +328,8 @@ public class TransferCtrl {
                          amount = null;
                          amt = "";
                      }else{
-                         amount =new DecimalFormat("0.00").parse(rs.getCell(6,i).getContents()).doubleValue();    //将String转换为Double 
-                         amt = amount.toString();
+                         //amount =new DecimalFormat("0.00").parse(rs.getCell(6,i).getContents()).doubleValue();    //将String转换为Double 
+                         amt = rs.getCell(6,i).getContents();//amount.toString();
                      }
                     
                  }
@@ -391,8 +391,8 @@ public class TransferCtrl {
                             amount = null;
                             amt = "";
                         }else{
-                        amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();
-                        amt = amount.toString();
+                        //amount = new DecimalFormat("0.00").parse(row.getCell(6).getStringCellValue()).doubleValue();
+                        amt = row.getCell(6).getStringCellValue();//amount.toString();
                         }
                     }
                     String typeMemo = row.getCell(7).getStringCellValue();
