@@ -173,6 +173,7 @@ public class TransferCtrl {
             for( int i=1; i < rsRows; i++){
                 if(rs.getCell(5, i).getContents().equals("上期所")){
                     String line  = "A999@" + rs.getCell(4, i).getContents() + "@" + rs.getCell(6,i).getContents() + "\r\n";
+                    line = line.replaceAll(",", "");
                     input.append(line);
                 }else{
                     continue;
@@ -222,7 +223,8 @@ public class TransferCtrl {
                      amt = amount.toString();
                      }
                  }   
-                 String  line = "A999@" + tradeCode + "@" + amt + "\r\n";     
+                 String  line = "A999@" + tradeCode + "@" + amt + "\r\n";  
+                 line = line.replaceAll(",", "");
                  input.append(line);
                 }else{
                     continue;
